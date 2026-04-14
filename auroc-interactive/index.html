@@ -31,6 +31,13 @@
   </script>
 
   <style>
+    /* Prevent text selection while interacting */
+    body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
     input[type=range] {
       -webkit-appearance: none;
       width: 100%;
@@ -41,200 +48,147 @@
     }
     input[type=range]::-webkit-slider-runnable-track {
       width: 100%;
-      height: 6px;
+      height: 4px;
       cursor: pointer;
       background: #e2e8f0;
-      border-radius: 3px;
+      border-radius: 2px;
     }
     input[type=range]::-webkit-slider-thumb {
-      height: 20px;
-      width: 20px;
+      height: 16px;
+      width: 16px;
       border-radius: 50%;
       background: #0d9488;
       cursor: pointer;
       -webkit-appearance: none;
-      margin-top: -7px;
+      margin-top: -6px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       border: 2px solid white;
     }
-    input[type=range]::-moz-range-track {
-      width: 100%;
-      height: 6px;
-      cursor: pointer;
-      background: #e2e8f0;
-      border-radius: 3px;
-    }
-    input[type=range]::-moz-range-thumb {
-      height: 18px;
-      width: 18px;
-      border-radius: 50%;
-      background: #0d9488;
-      cursor: pointer;
-      border: 2px solid white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    
+    /* Optimize for small screens to prevent overflow */
+    @media (max-width: 480px) {
+      .compact-text { font-size: 8px !important; }
+      .compact-num { font-size: 10px !important; }
+      .card-padding { padding: 12px !important; }
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans min-h-screen py-8 px-4">
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen py-4 md:py-8 px-2 md:px-4">
 
-  <header class="max-w-7xl mx-auto text-center mb-10">
-    <div class="text-[10px] tracking-[0.2em] uppercase text-teal-600 font-bold mb-2">Interactive Explainer</div>
-    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-3">
-      Understanding AUROC
-    </h1>
-    <p class="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto">
-      <span class="font-semibold text-slate-800">200만 마리의 쥐</span> 데이터셋 기반. 
-      분류 임계값 변화에 따른 지표와 ROC 커브의 관계를 한눈에 확인하세요.
+  <header class="max-w-7xl mx-auto text-center mb-6 md:mb-10">
+    <div class="text-[9px] tracking-[0.2em] uppercase text-teal-600 font-bold mb-1">Interactive Explainer</div>
+    <h1 class="text-xl md:text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Understanding AUROC</h1>
+    <p class="text-slate-500 text-[10px] md:text-sm leading-tight max-w-xl mx-auto">
+      모든 기기에서 동일한 레이아웃으로 데이터 변화를 확인하세요.
     </p>
   </header>
 
-  <main class="max-w-7xl mx-auto space-y-6">
+  <main class="max-w-7xl mx-auto space-y-4 md:space-y-6">
     
-    <!-- TOP ROW: Confusion Matrix/Metrics & ROC Curve -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+    <!-- TOP ROW: Confusion Matrix/Metrics & ROC Curve (ALWAYS 2 COLUMNS) -->
+    <div class="grid grid-cols-2 gap-2 md:gap-6 items-stretch">
       
       <!-- 1. LEFT: Confusion Matrix & Metrics -->
-      <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col">
-        <h2 class="text-[11px] font-bold tracking-wider uppercase text-slate-400 mb-6">Confusion Matrix & Metrics</h2>
+      <section class="bg-white border border-slate-200 rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm flex flex-col">
+        <h2 class="text-[8px] md:text-[11px] font-bold tracking-wider uppercase text-slate-400 mb-3 md:mb-6">Confusion Matrix</h2>
         
-        <div class="flex-grow grid grid-cols-1 md:grid-cols-[1fr_auto] lg:grid-cols-1 xl:grid-cols-[1fr_auto] gap-8 items-center">
+        <div class="flex-grow flex flex-col justify-between space-y-4">
           
-          <!-- Confusion Matrix Sub-grid -->
-          <div class="grid grid-cols-[auto_1fr_1fr] gap-2">
+          <!-- CM Grid -->
+          <div class="grid grid-cols-[auto_1fr_1fr] gap-1">
             <div></div>
-            <div class="text-center text-[10px] font-semibold text-slate-400 pb-2 border-b border-slate-100">Actual: Obese</div>
-            <div class="text-center text-[10px] font-semibold text-slate-400 pb-2 border-b border-slate-100">Actual: Normal</div>
+            <div class="text-center text-[7px] md:text-[10px] font-semibold text-slate-300 pb-1 border-b border-slate-50">Act: O</div>
+            <div class="text-center text-[7px] md:text-[10px] font-semibold text-slate-300 pb-1 border-b border-slate-50">Act: N</div>
 
-            <div class="flex items-center text-[10px] font-bold text-slate-400 pr-3 whitespace-nowrap leading-tight">Pred:<br>Obese</div>
-            <div class="bg-emerald-50 rounded-xl p-4 text-center">
-              <div class="text-[9px] font-bold text-emerald-600 tracking-wider mb-1">TP</div>
-              <div id="tp" class="font-mono text-sm font-bold text-emerald-700 leading-none">—</div>
+            <div class="flex items-center text-[7px] md:text-[10px] font-bold text-slate-300 pr-1 leading-none uppercase">Pr:O</div>
+            <div class="bg-emerald-50 rounded-lg p-1.5 md:p-4 text-center">
+              <div id="tp" class="font-mono text-[9px] md:text-sm font-bold text-emerald-700 leading-none">—</div>
             </div>
-            <div class="bg-rose-50 rounded-xl p-4 text-center">
-              <div class="text-[9px] font-bold text-rose-600 tracking-wider mb-1">FP</div>
-              <div id="fp" class="font-mono text-sm font-bold text-rose-700 leading-none">—</div>
+            <div class="bg-rose-50 rounded-lg p-1.5 md:p-4 text-center">
+              <div id="fp" class="font-mono text-[9px] md:text-sm font-bold text-rose-700 leading-none">—</div>
             </div>
 
-            <div class="flex items-center text-[10px] font-bold text-slate-400 pr-3 whitespace-nowrap leading-tight">Pred:<br>Normal</div>
-            <div class="bg-amber-50 rounded-xl p-4 text-center">
-              <div class="text-[9px] font-bold text-amber-600 tracking-wider mb-1">FN</div>
-              <div id="fn" class="font-mono text-sm font-bold text-amber-700 leading-none">—</div>
+            <div class="flex items-center text-[7px] md:text-[10px] font-bold text-slate-300 pr-1 leading-none uppercase">Pr:N</div>
+            <div class="bg-amber-50 rounded-lg p-1.5 md:p-4 text-center">
+              <div id="fn" class="font-mono text-[9px] md:text-sm font-bold text-amber-700 leading-none">—</div>
             </div>
-            <div class="bg-teal-50 rounded-xl p-4 text-center">
-              <div class="text-[9px] font-bold text-teal-600 tracking-wider mb-1">TN</div>
-              <div id="tn" class="font-mono text-sm font-bold text-teal-700 leading-none">—</div>
+            <div class="bg-teal-50 rounded-lg p-1.5 md:p-4 text-center">
+              <div id="tn" class="font-mono text-[9px] md:text-sm font-bold text-teal-700 leading-none">—</div>
             </div>
           </div>
 
-          <!-- Metrics Sub-list -->
-          <div class="flex flex-col justify-center space-y-4 min-w-[180px] md:pl-6 md:border-l lg:pl-0 lg:border-l-0 xl:pl-6 xl:border-l border-slate-100">
-            <div>
-              <div class="flex justify-between items-baseline mb-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Precision</span>
-                <span id="val-precision" class="font-mono text-lg font-bold text-slate-900">—</span>
-              </div>
-              <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div id="bar-precision" class="h-full bg-slate-300 transition-all duration-300"></div>
-              </div>
+          <!-- Metrics List -->
+          <div class="space-y-2 pt-2 border-t border-slate-50">
+            <div class="flex justify-between items-baseline">
+              <span class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase">Prec</span>
+              <span id="val-precision" class="font-mono text-[10px] md:text-lg font-bold text-slate-900">—</span>
             </div>
-            
-            <div>
-              <div class="flex justify-between items-baseline mb-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Sensitivity</span>
-                <span id="val-sensitivity" class="font-mono text-lg font-bold text-slate-900">—</span>
-              </div>
-              <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div id="bar-sensitivity" class="h-full bg-slate-300 transition-all duration-300"></div>
-              </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase">Sens</span>
+              <span id="val-sensitivity" class="font-mono text-[10px] md:text-lg font-bold text-slate-900">—</span>
             </div>
-
-            <div>
-              <div class="flex justify-between items-baseline mb-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Specificity</span>
-                <span id="val-specificity" class="font-mono text-lg font-bold text-slate-900">—</span>
-              </div>
-              <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div id="bar-specificity" class="h-full bg-slate-300 transition-all duration-300"></div>
-              </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase">Spec</span>
+              <span id="val-specificity" class="font-mono text-[10px] md:text-lg font-bold text-slate-900">—</span>
             </div>
-
-            <div>
-              <div class="flex justify-between items-baseline mb-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase text-rose-400">FPR</span>
-                <span id="val-fpr" class="font-mono text-lg font-bold text-slate-900">—</span>
-              </div>
-              <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div id="bar-fpr" class="h-full bg-rose-200 transition-all duration-300"></div>
-              </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase text-rose-300">FPR</span>
+              <span id="val-fpr" class="font-mono text-[10px] md:text-lg font-bold text-slate-900">—</span>
+            </div>
+            <!-- Progress bars removed for extreme compact mobile view, or kept very thin -->
+            <div class="h-[2px] w-full bg-slate-100 rounded-full overflow-hidden mt-1 opacity-50">
+              <div id="bar-sensitivity" class="h-full bg-slate-300"></div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- 2. RIGHT: ROC Curve -->
-      <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-[11px] font-bold tracking-wider uppercase text-slate-400">ROC Curve</h2>
-          <div class="bg-blue-50 border border-blue-100 rounded-full px-3 py-1 flex items-center gap-2">
-            <span class="text-[10px] font-bold text-blue-400 tracking-tighter uppercase">AUROC</span>
-            <span id="auroc-val" class="font-mono text-sm font-bold text-blue-600">—</span>
+      <section class="bg-white border border-slate-200 rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm flex flex-col">
+        <div class="flex justify-between items-center mb-2 md:mb-6">
+          <h2 class="text-[8px] md:text-[11px] font-bold tracking-wider uppercase text-slate-400">ROC Curve</h2>
+          <div class="bg-blue-50 px-1.5 py-0.5 rounded-full">
+             <span id="auroc-val" class="font-mono text-[9px] md:text-sm font-bold text-blue-600">—</span>
           </div>
         </div>
 
         <div class="flex-grow flex items-center justify-center">
-          <div class="w-full max-w-[340px] aspect-square bg-slate-50 rounded-xl border border-dashed border-slate-200 relative overflow-hidden">
-            <canvas id="roc" class="p-2"></canvas>
+          <div class="w-full aspect-square bg-slate-50 rounded-lg border border-dashed border-slate-100 relative overflow-hidden">
+            <canvas id="roc" class="p-1 md:p-2"></canvas>
           </div>
         </div>
-
-        <div class="flex flex-wrap gap-4 text-[9px] font-bold text-slate-400 justify-center mt-6">
-          <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-blue-500 rounded-full"></span> Curve</div>
-          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-500 border-white border"></span> Current</div>
-          <div class="flex items-center gap-1.5"><span class="w-3 border-t border-dashed border-slate-300"></span> Random</div>
+        
+        <div class="mt-2 text-center">
+           <span class="text-[7px] md:text-[9px] font-bold text-slate-300 uppercase tracking-tighter">FPR vs TPR</span>
         </div>
       </section>
 
     </div>
 
-    <!-- 3. BOTTOM ROW: Controls -->
-    <section class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+    <!-- 3. BOTTOM ROW: Controls (Grid 2 on all screens) -->
+    <section class="bg-white border border-slate-200 rounded-xl md:rounded-2xl p-4 md:p-8 shadow-sm">
+      <div class="grid grid-cols-2 gap-4 md:gap-12">
         
-        <!-- Control 1: Threshold -->
-        <div>
-          <div class="flex justify-between items-end mb-4">
-            <div class="space-y-1">
-              <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight text-teal-600">Classification Threshold</h3>
-              <p class="text-[10px] text-slate-400">민감도와 특이도의 트레이드오프를 결정합니다.</p>
-            </div>
-            <div id="thresh-val" class="font-mono text-3xl font-bold text-teal-600 leading-none">0.50</div>
+        <!-- Threshold Control -->
+        <div class="space-y-2 md:space-y-4">
+          <div class="flex justify-between items-end">
+             <span class="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase">Threshold</span>
+             <span id="thresh-val" class="font-mono text-sm md:text-3xl font-bold text-teal-600 leading-none">0.50</span>
           </div>
           <input type="range" id="thresh" min="0" max="1" step="0.01" value="0.5" class="accent-teal-600">
-          <div class="flex justify-between mt-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-            <span>Low</span>
-            <span>High</span>
-          </div>
         </div>
 
-        <!-- Control 2: Obesity Distribution -->
-        <div>
-          <div class="flex justify-between items-end mb-4">
-            <div class="space-y-1">
-              <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight text-emerald-600">Obesity Distribution</h3>
-              <p class="text-[10px] text-slate-400">경계선의 쥐가 많을수록 변별력이 낮아집니다.</p>
-            </div>
-            <div id="clear-val" class="font-mono text-xl font-bold text-emerald-600 leading-none">1,000,000</div>
+        <!-- Distribution Control -->
+        <div class="space-y-2 md:space-y-4">
+          <div class="flex justify-between items-end">
+             <span class="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase">Distribution</span>
+             <span id="clear-val" class="font-mono text-[10px] md:text-xl font-bold text-emerald-600 leading-none">1.0M</span>
           </div>
           <input type="range" id="clear-slider" min="0" max="1000000" step="10000" value="1000000" class="accent-emerald-600">
-          <div class="flex justify-between mt-4 items-center">
-            <div class="h-1.5 flex-grow bg-slate-100 rounded-full overflow-hidden mr-4">
-              <div id="clear-bar" class="h-full bg-emerald-500 transition-all duration-150" style="width: 100%"></div>
-            </div>
-            <div class="flex gap-2 text-[9px] font-mono text-slate-400 whitespace-nowrap">
-              <span>C: <span id="clear-count">1.0M</span></span>
-              <span>B: <span id="border-count">0</span></span>
-            </div>
+          
+          <div class="flex gap-2 text-[7px] font-mono text-slate-300 justify-end">
+            <span>C:<span id="clear-count">1.0M</span></span>
+            <span>B:<span id="border-count">0</span></span>
           </div>
         </div>
 
@@ -243,9 +197,16 @@
 
   </main>
 
-  <footer class="mt-12 text-center text-slate-300 text-[10px] font-bold uppercase tracking-widest">
-    &copy; 2024 &middot; AUROC Interactive Tool
+  <footer class="mt-6 md:mt-12 text-center text-slate-300 text-[8px] md:text-[10px] font-bold uppercase tracking-widest leading-none">
+    &copy; 2024 &middot; AUROC Interactive
   </footer>
+
+  <!-- Progress bars logic update in hidden elements if needed, but I simplified for side-by-side -->
+  <div class="hidden">
+    <div id="bar-precision"></div>
+    <div id="bar-specificity"></div>
+    <div id="bar-fpr"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>

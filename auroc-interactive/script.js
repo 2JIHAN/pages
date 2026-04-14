@@ -136,14 +136,30 @@ function updateUI(t, k) {
   if (k !== undefined) kProp = k;
   currentT = t;
   const s = getStats(t, kProp);
+  
+  // Numbers
   document.getElementById('tp').textContent = s.tp.toLocaleString();
   document.getElementById('fn').textContent = s.fn.toLocaleString();
   document.getElementById('fp').textContent = s.fp.toLocaleString();
   document.getElementById('tn').textContent = s.tn.toLocaleString();
-  document.getElementById('val-precision').textContent  = s.precision !== null ? (s.precision * 100).toFixed(1) + '%' : '—';
-  document.getElementById('val-sensitivity').textContent = (s.tpr * 100).toFixed(1) + '%';
-  document.getElementById('val-specificity').textContent = (s.specificity * 100).toFixed(1) + '%';
-  document.getElementById('val-fpr').textContent         = (s.fpr * 100).toFixed(1) + '%';
+  
+  // Metrics Text
+  const prec = s.precision !== null ? (s.precision * 100).toFixed(1) : 0;
+  const sens = (s.tpr * 100).toFixed(1);
+  const spec = (s.specificity * 100).toFixed(1);
+  const fpr = (s.fpr * 100).toFixed(1);
+
+  document.getElementById('val-precision').textContent   = (s.precision !== null ? prec + '%' : '—');
+  document.getElementById('val-sensitivity').textContent = sens + '%';
+  document.getElementById('val-specificity').textContent = spec + '%';
+  document.getElementById('val-fpr').textContent         = fpr + '%';
+
+  // Metrics Progress Bars
+  document.getElementById('bar-precision').style.width   = prec + '%';
+  document.getElementById('bar-sensitivity').style.width = sens + '%';
+  document.getElementById('bar-specificity').style.width = spec + '%';
+  document.getElementById('bar-fpr').style.width         = fpr + '%';
+  
   document.getElementById('thresh-val').textContent      = t.toFixed(2);
   
   if (k !== undefined) {

@@ -83,49 +83,16 @@
       Understanding AUROC
     </h1>
     <p class="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto">
-      <span class="font-semibold text-slate-800">200만 마리의 쥐</span> 데이터를 기반으로 모델의 성능 지표가 
-      Threshold 값에 따라 어떻게 변화하는지 터치/클릭하여 확인해 보세요.
+      <span class="font-semibold text-slate-800">200만 마리의 쥐</span> 데이터셋. 
+      Threshold 값에 따른 모델의 분류 성능 변화를 시각화합니다.
     </p>
   </header>
 
   <main class="max-w-4xl mx-auto space-y-6">
     
-    <!-- TOP SECTION: ROC Curve (Now prominent at the top) -->
+    <!-- 1. TOP SECTION: Confusion Matrix & Metrics (NOW AT TOP) -->
     <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div>
-          <h2 class="text-[11px] font-bold tracking-wider uppercase text-slate-400">ROC Curve</h2>
-          <p class="text-xs text-slate-400 mt-1">FPR 대비 TPR의 관계를 나타낸 곡선</p>
-        </div>
-        <div class="bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5 flex items-center gap-3">
-          <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">AUROC Score</span>
-          <span id="auroc-val" class="font-mono text-lg font-bold text-blue-600">0.000</span>
-        </div>
-      </div>
-
-      <div class="relative w-full aspect-video md:aspect-[2/1] max-h-[400px] bg-slate-50 rounded-xl border border-dashed border-slate-200 mb-6 flex items-center justify-center overflow-hidden">
-        <canvas id="roc"></canvas>
-      </div>
-
-      <div class="flex flex-wrap gap-x-6 gap-y-3 text-[10px] font-semibold text-slate-400 justify-center">
-        <div class="flex items-center gap-2">
-          <span class="w-5 h-0.5 bg-blue-500 rounded-full"></span>
-          <span>ROC curve</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-orange-500 border-2 border-white shadow-sm shadow-orange-200"></span>
-          <span>Current Threshold</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-5 border-t-[1.5px] border-dashed border-slate-300"></span>
-          <span>Random (AUC 0.5)</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- MIDDLE SECTION: Confusion Matrix & Metrics (Combined) -->
-    <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-      <div class="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <!-- Left: Confusion Matrix -->
         <div>
@@ -135,7 +102,7 @@
             <div class="text-center text-[10px] font-semibold text-slate-400 pb-2 border-b border-slate-100">Actual: Obese</div>
             <div class="text-center text-[10px] font-semibold text-slate-400 pb-2 border-b border-slate-100">Actual: Normal</div>
 
-            <div class="flex items-center text-[10px] font-semibold text-slate-400 pr-3 whitespace-nowrap">Pred: Obese</div>
+            <div class="flex items-center text-[11px] font-bold text-slate-400 pr-3 whitespace-nowrap">Pred: Obese</div>
             <div class="bg-emerald-50 rounded-xl p-4 text-center">
               <div class="text-[10px] font-bold text-emerald-600 tracking-wider mb-1">TP</div>
               <div id="tp" class="font-mono text-base font-bold text-emerald-700">—</div>
@@ -145,7 +112,7 @@
               <div id="fp" class="font-mono text-base font-bold text-rose-700">—</div>
             </div>
 
-            <div class="flex items-center text-[10px] font-semibold text-slate-400 pr-3 whitespace-nowrap">Pred: Normal</div>
+            <div class="flex items-center text-[11px] font-bold text-slate-400 pr-3 whitespace-nowrap">Pred: Normal</div>
             <div class="bg-amber-50 rounded-xl p-4 text-center">
               <div class="text-[10px] font-bold text-amber-600 tracking-wider mb-1">FN</div>
               <div id="fn" class="font-mono text-base font-bold text-amber-700">—</div>
@@ -158,7 +125,7 @@
         </div>
 
         <!-- Right: Metrics List -->
-        <div class="flex flex-col justify-center space-y-4 pt-4 lg:pt-0 lg:pl-8 lg:border-l lg:border-slate-100">
+        <div class="flex flex-col justify-center space-y-4 pt-6 md:pt-0 md:pl-8 md:border-l md:border-slate-100">
           <div>
             <div class="flex justify-between items-baseline mb-1">
               <span class="text-[11px] font-bold text-slate-400 uppercase tracking-tight">Precision</span>
@@ -202,50 +169,91 @@
       </div>
     </section>
 
-    <!-- BOTTOM SECTION: Controls (Two Columns) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Slider 1: Threshold -->
-      <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+    <!-- 2. MIDDLE SECTION: ROC Curve (SQUARE RATIO) -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-[11px] font-bold tracking-wider uppercase text-slate-400">ROC Curve</h2>
+        <div class="bg-blue-50 border border-blue-100 rounded-full px-3 py-1 flex items-center gap-2">
+          <span class="text-[10px] font-bold text-blue-400 uppercase tracking-tight">AUROC</span>
+          <span id="auroc-val" class="font-mono text-sm font-bold text-blue-600">—</span>
+        </div>
+      </div>
+
+      <div class="max-w-[450px] mx-auto">
+        <div class="relative w-full aspect-square bg-slate-50 rounded-xl border border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
+          <canvas id="roc" class="p-2"></canvas>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-4 text-[10px] font-bold text-slate-400 justify-center mt-6">
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-0.5 bg-blue-500 rounded-full"></span>
+          <span>ROC curve</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-orange-500 border-2 border-white shadow-sm shadow-orange-100"></span>
+          <span>Threshold Point</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 border-t-[1.5px] border-dashed border-slate-300"></span>
+          <span>Random</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. BOTTOM SECTION: Controls (COMBINED IN ONE CARD) -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-10">
+      
+      <!-- Control 1: Threshold -->
+      <div>
         <div class="flex justify-between items-end mb-4">
-          <label for="thresh" class="text-xs font-bold text-slate-500 uppercase tracking-tight">Classification Threshold</label>
+          <div class="space-y-1">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Classification Threshold</h3>
+            <p class="text-[10px] text-slate-400">기준점이 높을수록 더 엄격하게 비만을 판정합니다.</p>
+          </div>
           <div id="thresh-val" class="font-mono text-3xl font-bold text-teal-600 leading-none">0.50</div>
         </div>
         <input type="range" id="thresh" min="0" max="1" step="0.01" value="0.5" class="accent-teal-600">
-        <div class="flex justify-between mt-3 text-[10px] text-slate-400 font-medium">
-          <span>Lower (전부 비만)</span>
-          <span>Higher (전부 정상)</span>
+        <div class="flex justify-between mt-3 text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+          <span>All Obese (0.0)</span>
+          <span>All Normal (1.0)</span>
         </div>
-      </section>
+      </div>
 
-      <!-- Slider 2: Distribution -->
-      <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <hr class="border-slate-100">
+
+      <!-- Control 2: Obesity Distribution -->
+      <div>
         <div class="flex justify-between items-end mb-4">
-          <label for="clear-slider" class="text-xs font-bold text-slate-500 uppercase tracking-tight">Obesity Distribution</label>
+          <div class="space-y-1">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Obesity Distribution</h3>
+            <p class="text-[10px] text-slate-400">경계선Case가 많을수록 모델의 변별력(AUROC)이 떨어집니다.</p>
+          </div>
           <div id="clear-val" class="font-mono text-xl font-bold text-emerald-600 leading-none">1,000,000</div>
         </div>
         
         <input type="range" id="clear-slider" min="0" max="1000000" step="10000" value="1000000" class="accent-emerald-600">
         
-        <div class="flex justify-between mt-4 text-[10px] font-bold">
-          <span class="text-emerald-600">Clear Cases</span>
-          <span class="text-amber-600">Borderline Cases</span>
+        <div class="flex justify-between mt-4 text-[10px] font-bold mb-2">
+          <span class="text-emerald-600 uppercase">Clear Cases</span>
+          <span class="text-amber-600 uppercase">Borderline Cases</span>
         </div>
 
-        <div class="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div id="clear-bar" class="h-full bg-emerald-500 transition-all duration-150" style="width: 100%"></div>
         </div>
         
-        <div class="flex justify-between mt-1 text-[9px] font-mono text-slate-400">
+        <div class="flex justify-between mt-1 text-[10px] font-mono text-slate-400">
           <span id="clear-count">1,000,000</span>
           <span id="border-count">0</span>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
 
   </main>
 
-  <footer class="mt-12 text-center text-slate-300 text-[10px] font-semibold uppercase tracking-widest">
-    &copy; 2024 &middot; AUROC Interactive Explorer
+  <footer class="mt-12 text-center text-slate-300 text-[10px] font-bold uppercase tracking-[0.2em]">
+    &copy; 2024 &middot; AUROC Interactive
   </footer>
 
   <script src="script.js"></script>

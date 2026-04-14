@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUROC Interactive — Mouse Obesity Classifier</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface2: #eef0f3;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #1a1d23;
+    --text2: #5a6270;
+    --text3: #8a929e;
+    --blue: #1a6fd4;
+    --blue-dim: rgba(26,111,212,0.08);
+    --green: #1a8a3a;
+    --green-dim: rgba(26,138,58,0.1);
+    --green-text: #1a7a32;
+    --red: #d13030;
+    --red-dim: rgba(209,48,48,0.09);
+    --red-text: #b82424;
+    --amber: #a06010;
+    --amber-dim: rgba(160,96,16,0.1);
+    --amber-text: #8a5010;
+    --teal: #0e8c96;
+    --teal-dim: rgba(14,140,150,0.1);
+    --coral: #c05030;
+    --coral-dim: rgba(192,80,48,0.1);
+    --coral-text: #a84020;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    --sans: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px 48px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+    max-width: 700px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .subtitle strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* LEFT COLUMN */
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Confusion Matrix */
+  .cm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  .cm-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 4px;
+  }
+
+  .cm-header {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    padding: 4px 4px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cm-row-label {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text3);
+    padding-right: 8px;
+    white-space: nowrap;
+  }
+
+  .cm-cell {
+    border-radius: var(--radius);
+    padding: 12px 6px;
+    text-align: center;
+  }
+
+  .cm-cell .cell-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .cm-cell .cell-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .cell-tp { background: var(--green-dim); }
+  .cell-tp .cell-tag, .cell-tp .cell-num { color: var(--green-text); }
+
+  .cell-fn { background: var(--amber-dim); }
+  .cell-fn .cell-tag, .cell-fn .cell-num { color: var(--amber-text); }
+
+  .cell-fp { background: var(--red-dim); }
+  .cell-fp .cell-tag, .cell-fp .cell-num { color: var(--red-text); }
+
+  .cell-tn { background: var(--teal-dim); }
+  .cell-tn .cell-tag, .cell-tn .cell-num { color: var(--teal); }
+
+  .cm-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* Metrics */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+  }
+
+  .metric-name {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .metric-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .metric-formula {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  /* Slider */
+  .slider-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .slider-label {
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .slider-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--teal);
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--teal);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--teal);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  input[type=range]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--teal);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+  }
+
+  .slider-ends {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 6px;
+  }
+
+  /* RIGHT COLUMN */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .roc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+
+  .roc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .auroc-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-dim);
+    border: 1px solid rgba(88,166,255,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .auroc-badge strong {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue);
+  }
+
+  .roc-canvas-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    height: 0;
+  }
+
+  .roc-canvas-wrap > div {
+    position: absolute;
+    inset: 0;
+  }
+
+  .roc-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-line {
+    width: 20px;
+    height: 2px;
+    background: var(--blue);
+    border-radius: 1px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--coral);
+  }
+
+  .legend-dash {
+    width: 20px;
+    border-top: 1.5px dashed rgba(139,148,158,0.4);
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .app {
+      grid-template-columns: 1fr;
+    }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Interactive Explainer</div>
+  <h1>Understanding AUROC</h1>
+  <p class="subtitle">
+    <strong>200만 마리의 쥐</strong> — 비만 1,000,000마리 + 정상 1,000,000마리.<br>
+    Threshold를 움직여 Confusion Matrix, 지표, ROC 커브 위 위치가 어떻게 변하는지 확인하세요.
+  </p>
+</header>
+
+<div class="app">
+
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+
+    <!-- Confusion Matrix -->
+    <div class="cm-card">
+      <div class="card-label">Confusion Matrix</div>
+      <div class="cm-grid">
+        <div></div>
+        <div class="cm-header">Actual: Obese</div>
+        <div class="cm-header">Actual: Not Obese</div>
+
+        <div class="cm-row-label">Pred: Obese</div>
+        <div class="cm-cell cell-tp">
+          <div class="cell-tag">TP</div>
+          <div class="cell-num" id="tp">—</div>
+        </div>
+        <div class="cm-cell cell-fp">
+          <div class="cell-tag">FP</div>
+          <div class="cell-num" id="fp">—</div>
+        </div>
+
+        <div class="cm-row-label">Pred: Not Obese</div>
+        <div class="cm-cell cell-fn">
+          <div class="cell-tag">FN</div>
+          <div class="cell-num" id="fn">—</div>
+        </div>
+        <div class="cm-cell cell-tn">
+          <div class="cell-tag">TN</div>
+          <div class="cell-num" id="tn">—</div>
+        </div>
+      </div>
+      <div class="cm-legend">
+        <span style="color:var(--green-text)">TP</span> True Positive ·
+        <span style="color:var(--amber-text)">FN</span> False Negative ·
+        <span style="color:var(--red-text)">FP</span> False Positive ·
+        <span style="color:var(--teal)">TN</span> True Negative
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-name">Precision</div>
+        <div class="metric-value" id="val-precision">—</div>
+        <div class="metric-formula">TP / (TP+FP)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">Sensitivity (TPR)</div>
+        <div class="metric-value" id="val-sensitivity">—</div>
+        <div class="metric-formula">TP / (TP+FN)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">Specificity</div>
+        <div class="metric-value" id="val-specificity">—</div>
+        <div class="metric-formula">TN / (TN+FP)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">FPR</div>
+        <div class="metric-value" id="val-fpr">—</div>
+        <div class="metric-formula">FP / (FP+TN)</div>
+      </div>
+    </div>
+
+    <!-- Slider -->
+    <div class="slider-card">
+      <div class="slider-header">
+        <span class="slider-label">Classification Threshold</span>
+        <span class="slider-value" id="thresh-val">0.50</span>
+      </div>
+      <input type="range" id="thresh" min="0" max="1" step="0.01" value="0.5">
+      <div class="slider-ends">
+        <span>0 → 전부 비만으로 분류</span>
+        <span>전부 정상으로 분류 → 1</span>
+      </div>
+    </div>
+
+    <!-- Clearly Obese Count Slider -->
+    <div class="slider-card">
+      <div class="slider-header">
+        <span class="slider-label">확실한 비만 쥐 수</span>
+        <span style="font-family:var(--mono);font-size:17px;font-weight:700;color:var(--green-text)" id="clear-val">1,000,000</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:10px">
+        비만 100만 마리 중 <span style="color:var(--green-text);font-weight:600">확실한 비만</span>(μ=0.65)과
+        <span style="color:var(--amber-text);font-weight:600">경계선 비만</span>(μ=0.45)의 비율.<br>
+        경계선 비만이 많을수록 정상 쥐와 점수가 겹쳐 ROC 면적이 줄어듭니다.
+      </div>
+      <input type="range" id="clear-slider" min="0" max="1000000" step="10000" value="1000000">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-top:8px">
+        <span style="color:var(--green-text)">확실: <span id="clear-count">1,000,000</span>마리</span>
+        <span style="color:var(--amber-text)">경계선: <span id="border-count">0</span>마리</span>
+      </div>
+      <div style="margin-top:8px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden">
+        <div id="clear-bar" style="height:100%;width:100%;background:linear-gradient(90deg,var(--green-text),#3fb950);border-radius:3px;transition:width 0.08s"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
+    <div class="roc-card">
+      <div class="roc-header">
+        <div class="card-label" style="margin-bottom:0">ROC Curve</div>
+        <div class="auroc-badge">AUROC = <strong id="auroc-val">—</strong></div>
+      </div>
+      <div class="roc-canvas-wrap">
+        <div>
+          <canvas id="roc"
+            role="img"
+            aria-label="ROC curve. X-axis: FPR from 0 to 1. Y-axis: TPR (Sensitivity) from 0 to 1. AUROC approximately 0.921. A coral dot marks the current threshold.">
+            ROC curve for mouse obesity classifier.
+          </canvas>
+        </div>
+      </div>
+      <div class="roc-legend">
+        <div class="legend-item"><div class="legend-line"></div> ROC curve</div>
+        <div class="legend-item"><div class="legend-dot"></div> Current threshold</div>
+        <div class="legend-item"><div class="legend-dash"></div> Random classifier</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function erf(x) {
+  const s = x >= 0 ? 1 : -1, a = Math.abs(x);
+  const t = 1 / (1 + 0.3275911 * a);
+  const y = 1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - 0.284496736)*t + 0.254829592)*t * Math.exp(-a*a);
+  return s * y;
+}
+function normCDF(x, mu, sg) { return 0.5 * (1 + erf((x - mu) / (sg * Math.SQRT2))); }
+
+const N = 1000000, MUN = 0.35, SG = 0.15;
+const MU_CLEAR = 0.65, MU_BORDER = 0.45;
+
+let kProp = 1.0;
+
+function getStats(t, k) {
+  if (k === undefined) k = kProp;
+  const tpr = k * (1 - normCDF(t, MU_CLEAR, SG)) + (1 - k) * (1 - normCDF(t, MU_BORDER, SG));
+  const fpr = 1 - normCDF(t, MUN, SG);
+  const tp = Math.round(N * tpr), fn = N - tp;
+  const fp = Math.round(N * fpr), tn = N - fp;
+  return { tp, fn, fp, tn, tpr, fpr, specificity: 1 - fpr, precision: (tp + fp) > 0 ? tp / (tp + fp) : null };
+}
+
+function computeROC(k) {
+  const data = [];
+  for (let i = 0; i <= 400; i++) {
+    const s = getStats(i / 400, k);
+    data.push({ x: s.fpr, y: s.tpr });
+  }
+  data.sort((a, b) => a.x - b.x);
+  let auc = 0;
+  for (let i = 1; i < data.length; i++)
+    auc += (data[i].x - data[i-1].x) * (data[i].y + data[i-1].y) / 2;
+  return { data, auc };
+}
+
+let { data: rocData, auc: initAuroc } = computeROC(1.0);
+document.getElementById('auroc-val').textContent = initAuroc.toFixed(3);
+
+let currentT = 0.5;
+const GC = 'rgba(0,0,0,0.06)';
+const TC = 'rgba(90,98,112,0.9)';
+
+function rrect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y);
+  c.closePath();
+}
+
+const labelPlugin = {
+  id: 'lp',
+  afterDraw(ch) {
+    const meta = ch.getDatasetMeta(2);
+    if (!meta.data.length) return;
+    const pt = meta.data[0];
+    const s = getStats(currentT, kProp);
+    const lines = [
+      `T = ${currentT.toFixed(2)}`,
+      `TPR = ${(s.tpr*100).toFixed(1)}%`,
+      `FPR = ${(s.fpr*100).toFixed(1)}%`
+    ];
+    const c = ch.ctx; c.save();
+    c.font = '600 11px ' + "'SF Mono','Consolas',monospace";
+    const lh = 14, pd = 7, bw = 88, bh = lines.length * lh + pd * 2;
+    const ca = ch.chartArea;
+    const px = pt.x, py = pt.y;
+    const bx = s.fpr < 0.55
+      ? Math.min(ca.right - bw - 2, px + 13)
+      : Math.max(ca.left + 2, px - bw - 13);
+    const by = Math.max(ca.top + 2, Math.min(ca.bottom - bh - 2, py - bh / 2));
+    c.fillStyle = 'rgba(255,253,251,0.97)';
+    c.strokeStyle = '#c05030'; c.lineWidth = 1.5;
+    rrect(c, bx, by, bw, bh, 6); c.fill(); c.stroke();
+    c.fillStyle = '#a84020';
+    c.textBaseline = 'top';
+    lines.forEach((l, i) => c.fillText(l, bx + pd, by + pd + i * lh));
+    c.restore();
+  }
+};
+
+const rocChart = new Chart(document.getElementById('roc'), {
+  type: 'scatter',
+  plugins: [labelPlugin],
+  data: {
+    datasets: [
+      {
+        data: rocData, type: 'line',
+        borderColor: '#58a6ff',
+        backgroundColor: 'rgba(26,111,212,0.07)',
+        fill: true, borderWidth: 2.5, pointRadius: 0, tension: 0.12, order: 3
+      },
+      {
+        data: [{x:0,y:0},{x:1,y:1}], type: 'line',
+        borderColor: 'rgba(100,110,125,0.3)',
+        borderDash: [5, 4], borderWidth: 1.5,
+        pointRadius: 0, fill: false, order: 4
+      },
+      {
+        data: [{x: 0, y: 0}], type: 'scatter',
+        backgroundColor: '#e07050',
+        borderColor: '#f5f6f8',
+        borderWidth: 2.5, pointRadius: 9, pointHoverRadius: 11, order: 1
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 0 },
+    scales: {
+      x: {
+        min: 0, max: 1,
+        title: { display: true, text: 'FPR (1 − Specificity)', color: TC, font: { size: 11 } },
+        ticks: { color: TC, font: { size: 11 }, maxTicksLimit: 6 },
+        grid: { color: GC },
+        border: { color: 'rgba(0,0,0,0.1)' }
+      },
+      y: {
+        min: 0, max: 1,
+        title: { display: true, text: 'TPR (Sensitivity)', color: TC, font: { size: 11 } },
+        ticks: { color: TC, font: { size: 11 }, maxTicksLimit: 6 },
+        grid: { color: GC },
+        border: { color: 'rgba(0,0,0,0.1)' }
+      }
+    },
+    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+  }
+});
+
+function updateUI(t, k) {
+  if (k !== undefined) kProp = k;
+  currentT = t;
+  const s = getStats(t, kProp);
+  document.getElementById('tp').textContent = s.tp.toLocaleString();
+  document.getElementById('fn').textContent = s.fn.toLocaleString();
+  document.getElementById('fp').textContent = s.fp.toLocaleString();
+  document.getElementById('tn').textContent = s.tn.toLocaleString();
+  document.getElementById('val-precision').textContent  = s.precision !== null ? (s.precision * 100).toFixed(1) + '%' : '—';
+  document.getElementById('val-sensitivity').textContent = (s.tpr * 100).toFixed(1) + '%';
+  document.getElementById('val-specificity').textContent = (s.specificity * 100).toFixed(1) + '%';
+  document.getElementById('val-fpr').textContent         = (s.fpr * 100).toFixed(1) + '%';
+  document.getElementById('thresh-val').textContent      = t.toFixed(2);
+  if (k !== undefined) {
+    const { data, auc } = computeROC(k);
+    rocChart.data.datasets[0].data = data;
+    document.getElementById('auroc-val').textContent = auc.toFixed(3);
+  }
+  rocChart.data.datasets[2].data = [{ x: s.fpr, y: s.tpr }];
+  rocChart.update('none');
+}
+
+document.getElementById('thresh').addEventListener('input', e => {
+  updateUI(parseFloat(e.target.value));
+});
+
+document.getElementById('clear-slider').addEventListener('input', e => {
+  const clearN = parseInt(e.target.value);
+  const k = clearN / 1000000;
+  document.getElementById('clear-val').textContent   = clearN.toLocaleString();
+  document.getElementById('clear-count').textContent = clearN.toLocaleString();
+  document.getElementById('border-count').textContent = (1000000 - clearN).toLocaleString();
+  document.getElementById('clear-bar').style.width   = (k * 100) + '%';
+  updateUI(currentT, k);
+});
+
+updateUI(0.5);
+</script>
+</body>
+</html>
